@@ -4,10 +4,10 @@ import { customElement, state } from 'lit/decorators.js';
 import { consume } from '@lit/context';
 import { classMap } from 'lit/directives/class-map.js';
 
-import { appContext, AppContext } from './ui/context.ts';
+import { appContext, AppContext } from './context.ts';
 import { sharedStyles } from './shared-styles.ts';
 import { StudioModule } from './studio-module.ts';
-import type { Track, Clip } from './ui/sections.ts';
+import type { Track, Clip } from './sections.ts';
 
 type DraggingState = {
   type: 'move' | 'trim-start' | 'trim-end';

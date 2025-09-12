@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { html, css } from 'lit';
+import { html, css, nothing } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { ContextConsumer } from '@lit/context';
 
@@ -44,35 +44,117 @@ export class LoraTrainingUtility extends StudioModule {
     static styles = [
         sharedStyles,
         css`
-            .file-processing-indicator {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                color: var(--text-tertiary);
-                font-size: 0.8rem;
-                padding: 0.8rem 0 0.5rem;
+            .drop-zone {
+                border: 2px dashed var(--border-color);
+                border-radius: 12px;
+                padding: 2rem;
+                text-align: center;
+                cursor: pointer;
             }
-            .spinner {
-                animation: rotate 2s linear infinite;
+            .drop-zone.dragover {
+                border-color: var(--accent-primary);
+                background-color: var(--bg-hover);
             }
-            @keyframes rotate {
-                100% { transform: rotate(360deg); }
+            .logs {
+                font-family: monospace;
+                font-size: 0.75rem;
+                max-height: 150px;
+                overflow-y: auto;
+                background: var(--bg-panel);
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                padding: 0.5rem;
             }
-            .spinner .path {
-                stroke: currentColor;
-                stroke-linecap: round;
-                animation: dash 1.5s ease-in-out infinite;
-            }
-            @keyframes dash {
-                0% { stroke-dasharray: 1, 150; stroke-dashoffset: 0; }
-                50% { stroke-dasharray: 90, 150; stroke-dashoffset: -35; }
-                100% { stroke-dasharray: 90, 150; stroke-dashoffset: -124; }
+            .log-entry + .log-entry {
+                margin-top: 0.25rem;
             }
         `,
     ];
 
+    private _handleDragOver(e: DragEvent) {
+        e.preventDefault();
+        this.isDragOver = true;
+    }
+
+    private _handleDragLeave(e: DragEvent) {
+        e.preventDefault();
+        this.isDragOver = false;
+    }
+
+    private _handleDrop(e: DragEvent) {
+        e.preventDefault();
+        this.isDragOver = false;
+        const files = Array.from(e.dataTransfer?.files || []);
+        if (files.length) {
+            this.datasetFiles = files;
+            this.trainingLogs.push({ level: 'INFO', msg: `Added ${files.length} file(s)` });
+        }
+    }
+
+    private _handleFileInput(e: Event) {
+        const files = (e.target as HTMLInputElement).files;
+        if (files && files.length) {
+            this.datasetFiles = Array.from(files);
+            this.trainingLogs.push({ level: 'INFO', msg: `Selected ${files.length} file(s)` });
+        }
+    }
+
+    private _startTraining() {
+        if (!this.datasetFiles.length && !this.datasetUrl) {
+            this.trainingLogs.push({ level: 'ERROR', msg: 'No dataset provided' });
+            return;
+        }
+        this.trainingLogs.push({ level: 'INFO', msg: 'Starting training (stub)...' });
+        setTimeout(() => {
+            this.trainingLogs.push({ level: 'SUCCESS', msg: 'Training complete' });
+            this.requestUpdate();
+        }, 1000);
+    }
+
+    private _renderLogs() {
+        return html`
+            <div class="logs">
+                ${this.trainingLogs.map(l => html`<div class="log-entry ${l.level.toLowerCase()}">${l.msg}</div>`)}
+            </div>
+        `;
+    }
+
     render() {
-        return html`<section id="lora-training-section"></section>`;
+        return html`
+            <section id="lora-training-section">
+                <div
+                    class="drop-zone ${this.isDragOver ? 'dragover' : ''}"
+                    @dragover=${this._handleDragOver}
+                    @dragleave=${this._handleDragLeave}
+                    @drop=${this._handleDrop}
+                    @click=${() => this.shadowRoot?.getElementById('file-input')?.click()}
+                >
+                    <p>${this.datasetFiles.length ? `${this.datasetFiles.length} file(s) selected` : 'Drop dataset files here or click to browse'}</p>
+                    <input id="file-input" type="file" multiple hidden @change=${this._handleFileInput} />
+                </div>
+
+                <file-link-input
+                    label="Dataset URL"
+                    .value=${this.datasetUrl}
+                    @value-changed=${(e: CustomEvent<string>) => { this.datasetUrl = e.detail; }}
+                ></file-link-input>
+
+                <div class="mt-2">
+                    <label>
+                        <input type="radio" name="ttype" value="sound" ?checked=${this.trainingType === 'sound'} @change=${() => (this.trainingType = 'sound')} />
+                        Sound
+                    </label>
+                    <label class="ml-4">
+                        <input type="radio" name="ttype" value="vocal" ?checked=${this.trainingType === 'vocal'} @change=${() => (this.trainingType = 'vocal')} />
+                        Vocal
+                    </label>
+                </div>
+
+                <button class="button mt-4" @click=${this._startTraining}>Train</button>
+
+                ${this.trainingLogs.length ? this._renderLogs() : nothing}
+            </section>
+        `;
     }
 }
 

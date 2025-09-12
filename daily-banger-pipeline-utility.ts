@@ -12,7 +12,7 @@ import { consume } from '@lit/context';
 
 import { sharedStyles } from './shared-styles.ts';
 import { StudioModule } from './studio-module.ts';
-import { aiService } from './services/ai-service.ts';
+import { aiService } from './ai-service.ts';
 import { DailyHits } from './schema.ts';
 import { appContext, AppContext } from './context.ts';
 import { beatAgent } from './beat-agent.ts';
