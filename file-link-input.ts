@@ -136,4 +136,12 @@ export class FileLinkInput extends LitElement {
                         Note: Fetching from a link may fail due to browser security (CORS). If you encounter an error, please download the file and use the "Upload File" option.
                     </div>
                 `}
-                <div class="file
+                ${this.statusMessage ? html`
+                    <div class="file-link-input-status ${this.statusType}">
+                        ${this.statusMessage}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }
+}

@@ -15,7 +15,7 @@ import { aiService } from '@/ai-service.ts';
 @customElement('settings-module')
 export class SettingsModule extends StudioModule {
     
-    @state() private settings: Partial<Settings> = {};
+    @state() private settings: any = {};
     @state() private saveStatus = '';
     private saveTimeout: number | undefined;
 

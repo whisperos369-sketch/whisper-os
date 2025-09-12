@@ -11,10 +11,6 @@ import {sharedStyles} from '@/shared-styles.ts';
 
 type CoverLora = { path: string, weight: number };
 
-type GeneratedImage = {
-  url: string;
-  score: number;
-};
 
 @customElement('cover-art-module')
 export class CoverArtModule extends LitElement {
@@ -25,7 +21,7 @@ export class CoverArtModule extends LitElement {
   @state() private negative = 'blurry, text, watermark, ugly';
   @state() private numImages = 4;
   @state() private loraStack: CoverLora[] = [];
-  @state() private generatedImages: GeneratedImage[] = [];
+  @state() private generatedImages: string[] = [];
   @state() private pickedUrl: string | null = null;
   @state() private loading = false;
   @state() private error = '';
@@ -122,16 +118,17 @@ export class CoverArtModule extends LitElement {
     this.generatedImages = [];
     this.pickedUrl = null;
     try {
-      const res = await aiService.coverArt({
-        prompt: this.prompt,
-        negative: this.negative,
-        numImages: this.numImages,
-        loras: this.loraStack
-      });
-      this.generatedImages = res.images;
-      this.pickedUrl = res.pickedUrl;
+        const res = await aiService.coverArt({
+          prompt: this.prompt,
+          negative: this.negative,
+          numImages: this.numImages,
+          loras: this.loraStack
+        });
+        this.generatedImages = [res.imagePath];
+        this.pickedUrl = res.imagePath;
     } catch (e: any) {
       this.error = e?.message ?? 'Cover art generation failed.';
+      this._app.showToast(this.error, 'error');
     } finally {
       this.loading = false;
     }
@@ -183,9 +180,8 @@ export class CoverArtModule extends LitElement {
           </div>
           <div class="image-gallery">
             ${this.generatedImages.map(img => html`
-              <div class="image-container ${classMap({picked: this.pickedUrl === img.url})}" @click=${() => this.pickedUrl = img.url}>
-                <img src=${img.url} alt=${this.prompt}>
-                <div class="image-overlay">Score: ${img.score.toFixed(4)}</div>
+              <div class="image-container ${classMap({picked: this.pickedUrl === img})}" @click=${() => this.pickedUrl = img}>
+                <img src=${img} alt=${this.prompt}>
               </div>
             `)}
           </div>

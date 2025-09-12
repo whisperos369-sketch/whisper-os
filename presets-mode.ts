@@ -14,7 +14,7 @@ import { StudioModule } from './studio-module.ts';
 import { PRESETS, Preset, PresetId } from './presets.ts';
 import { MOODS, STANDARD_VOCAL_MODELS } from './data.ts';
 import { appContext } from './context.ts';
-import { aiService } from './services/ai-service.ts';
+import { aiService } from '@/ai-service.ts';
 import type { AutoMashupPlan } from './schema.ts';
 import { beatAgent } from './beat-agent.ts';
 

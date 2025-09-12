@@ -45,33 +45,33 @@ export class MusicModule extends StudioModule {
         const { generators } = this._app.songState!;
         const res = await aiService.musicGen({
           prompt: this.prompt,
-          duration: this.duration,
+          durationSec: this.duration,
           model: generators.baseModel,
           temperature: generators.temperature,
           top_k: generators.topK,
           top_p: generators.topP,
         });
 
-        this.url = res.url;
-        const newVersion = {id: crypto.randomUUID(), label:`MusicGen ${this._app.songState!.versions.length+1}`, url:res.url, createdAt:Date.now()};
-      
+        this.url = res.mp3Path;
+        const newVersion = {id: crypto.randomUUID(), label:`MusicGen ${this._app.songState!.versions.length+1}`, url:res.mp3Path, createdAt:Date.now()};
+
         const updates: Partial<SongState> = {
-            audio: { ...this._app.songState!.audio, latestMix: res.url },
+            audio: { ...this._app.songState!.audio, latestMix: res.mp3Path },
             versions: [...this._app.songState!.versions, newVersion],
         };
-        if (res.note) {
-            this._app.showToast(res.note, 'info');
-        }
         this._app.updateCurrentSong(updates);
 
         return res;
       };
       
-      await this._performTask('Generate Instrumental (Single Shot)', [
+      const res = await this._performTask('Generate Instrumental (Single Shot)', [
           { message: `Requesting model...`, duration: 1000 },
           { message: 'Generating audio waveform...', duration: 8000 },
           { message: 'Finalizing audio...', duration: 2000 },
       ], task);
+      if (!res) {
+        this._app.showToast(this.errorMessage || 'Music generation failed.', 'error');
+      }
   }
 
   private async _generateChunked() {
@@ -101,11 +101,14 @@ export class MusicModule extends StudioModule {
         return res;
       };
       
-      await this._performTask(`Generate Instrumental (Chunked, ~${targetDuration}s)`, [
+      const res = await this._performTask(`Generate Instrumental (Chunked, ~${targetDuration}s)`, [
           { message: `Requesting model...`, duration: 1000 },
           { message: 'Generating audio segments...', duration: 15000 },
           { message: 'Stitching and crossfading...', duration: 3000 },
       ], task);
+      if (!res) {
+        this._app.showToast(this.errorMessage || 'Music generation failed.', 'error');
+      }
   }
 
   static styles = [sharedStyles, css`
