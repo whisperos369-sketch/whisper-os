@@ -1,0 +1,11 @@
+
+[
+  {
+    "path": "visuals/lora/synthwave_style.safetensors",
+    "weight": 0.8
+  },
+  {
+    "path": "visuals/lora/abstract_glow.safetensors",
+    "weight": 0.5
+  }
+]

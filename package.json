@@ -1,0 +1,29 @@
+{
+  "name": "whisper-os-music-ui",
+  "private": true,
+  "version": "13.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@google/genai": "^1.0.0",
+    "@lit/context": "^1.1.6",
+    "lit": "^3.1.4",
+    "zod": "^3.23.8",
+    "mitt": "^3.0.1",
+    "dayjs": "^1.11.11",
+    "xlsx": "^0.18.5",
+    "idb-keyval": "^6.2.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "@types/uuid": "^9.0.8",
+    "typescript": "^5.2.2",
+    "vite": "^5.3.1"
+  }
+}
