@@ -15,7 +15,6 @@ export class VideoModule extends StudioModule {
   private _app!: AppContext;
   
   @state() private audioUrl: string = '';
-  @state() private imageUrl: string = '';
   @state() private template: VideoTemplate = 'spectrum';
   @state() private videoUrl: string | null = null;
   
@@ -51,33 +50,33 @@ export class VideoModule extends StudioModule {
   }
 
   private async _generate() {
-    if (!this.audioUrl || !this.imageUrl) {
-        this.errorMessage = 'Please select a mastered mix and a cover image.';
+    if (!this.audioUrl) {
+        this.errorMessage = 'Please select a mastered mix.';
         return;
     }
     this.videoUrl = null;
 
     const task = async () => {
         const res = await aiService.videoGen({
-            audioUrl: this.audioUrl,
-            imageUrl: this.imageUrl,
-            template: this.template,
+            audioPath: this.audioUrl,
+            preset: this.template,
         });
-        this.videoUrl = res.videoUrl;
+        this.videoUrl = res.videoPath;
         const project = this._getProject();
         if (project) {
             this._app.updateCurrentSong({
-                visuals: { ...project.visuals, videoUrl: res.videoUrl }
+                visuals: { ...project.visuals, videoUrl: res.videoPath }
             });
         }
     };
-    
-    const res = await this._performTask('Render Video', [
-        { message: 'Preparing assets for video render...', duration: 1500 },
-        { message: 'Rendering frames with FFMpeg...', duration: 6000 },
-        { message: 'Encoding final video...', duration: 2000 },
-    ], task);
-    if (!res) {
+
+    try {
+        await this._performTask('Render Video', [
+            { message: 'Preparing assets for video render...', duration: 1500 },
+            { message: 'Rendering frames with FFMpeg...', duration: 6000 },
+            { message: 'Encoding final video...', duration: 2000 },
+        ], task);
+    } catch {
         this._app.showToast(this.errorMessage || 'Video render failed.', 'error');
     }
   }
@@ -88,16 +87,14 @@ export class VideoModule extends StudioModule {
     
     // Auto-populate from project state if available
     const latestAudio = project.audio.latestMix;
-    const latestCover = project.visuals?.coverArtUrl;
     if (!this.audioUrl && latestAudio) this.audioUrl = latestAudio;
-    if (!this.imageUrl && latestCover) this.imageUrl = latestCover;
 
     return html`
       <div class="panel">
         <h2 class="page-title">Video Generator</h2>
         <div class="grid">
             <div class="preview">
-                ${this.videoUrl 
+                ${this.videoUrl
                     ? html`<video controls src=${this.videoUrl}></video>`
                     : html`<p style="color: var(--text-tertiary);">Video preview will appear here</p>`
                 }
@@ -111,13 +108,8 @@ export class VideoModule extends StudioModule {
                         </select>
                     </label>
                 </div>
-                 <div>
-                    <label>Cover Art Image URL
-                        <input type="text" .value=${this.imageUrl} @input=${(e: any) => this.imageUrl = e.target.value} placeholder="Paste image URL here..." ?disabled=${this.isLoading}>
-                    </label>
-                </div>
                 <div>
-                    <label>Template
+                    <label>Preset
                         <select .value=${this.template} @change=${(e:any) => this.template = e.target.value} ?disabled=${this.isLoading}>
                             <option value="spectrum">Spectrum</option>
                             <option value="audiogram">Audiogram</option>
