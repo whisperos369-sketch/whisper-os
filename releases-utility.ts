@@ -199,4 +199,21 @@ export class ReleasesUtility extends LitElement {
         }
 
         try {
-            // FIX: aiService.generateReleasePack was
+            // TODO: call aiService.generateReleasePack once implemented
+        } catch (err) {
+            console.error(err);
+        } finally {
+            this.isGenerating = false;
+        }
+    }
+
+    render() {
+        return html`<div class="panel">Releases utility under construction.</div>`;
+    }
+}
+
+declare global {
+    interface HTMLElementTagNameMap {
+        'releases-utility': ReleasesUtility;
+    }
+}

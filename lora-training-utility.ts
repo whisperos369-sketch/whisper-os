@@ -4,31 +4,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { html, svg, css, LitElement } from 'lit';
+import { html, css } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { ContextConsumer } from '@lit/context';
-import { classMap } from 'lit/directives/class-map.js';
 
-import { sharedStyles } from '../shared-styles.ts';
-import { StudioModule } from '../studio-module.ts';
-import { appContext, Lora } from '../context.ts';
-import { AIError } from '../services/ai-service.ts';
-import { taskService } from '../task-service.ts';
-import { beatAgent } from '../beat-agent.ts';
+import { sharedStyles } from './shared-styles.ts';
+import { StudioModule } from './studio-module.ts';
+import { appContext, Lora } from './context.ts';
 
-// Import the new file input component
 import './file-link-input.ts';
 
-type LogEntry = {
+// Basic placeholder types
+interface LogEntry {
     level: 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR';
     msg: string;
-};
+}
 
 type LoraTrainingType = 'sound' | 'vocal';
 
 @customElement('lora-training-utility')
 export class LoraTrainingUtility extends StudioModule {
-    private appContextConsumer = new ContextConsumer(this, {context: appContext, subscribe: true});
+    private appContextConsumer = new ContextConsumer(this, { context: appContext, subscribe: true });
 
     @state() private isDragOver = false;
     @state() private datasetFiles: File[] = [];
@@ -36,14 +32,13 @@ export class LoraTrainingUtility extends StudioModule {
     @state() private trainingLogs: LogEntry[] = [];
     @state() private trainingType: LoraTrainingType = 'sound';
     @state() private isProcessingFiles = false;
-    
-    // LoRA Test Modal State
+
     @state() private showTestModal = false;
     @state() private testingLora: Lora | null = null;
     @state() private isGeneratingTestSample = false;
     @state() private testLoraTemperature = 0.7;
     @state() private testLoraGuidanceScale = 7.5;
-    
+
     @query('#lora-training-section') private loraTrainingSection!: HTMLElement;
 
     static styles = [
@@ -70,4 +65,20 @@ export class LoraTrainingUtility extends StudioModule {
             }
             @keyframes dash {
                 0% { stroke-dasharray: 1, 150; stroke-dashoffset: 0; }
-                50% { stroke-dasharray: 90, 150; stroke-dashoffset: -35;
+                50% { stroke-dasharray: 90, 150; stroke-dashoffset: -35; }
+                100% { stroke-dasharray: 90, 150; stroke-dashoffset: -124; }
+            }
+        `,
+    ];
+
+    render() {
+        return html`<section id="lora-training-section"></section>`;
+    }
+}
+
+declare global {
+    interface HTMLElementTagNameMap {
+        'lora-training-utility': LoraTrainingUtility;
+    }
+}
+
