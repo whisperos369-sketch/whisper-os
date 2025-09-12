@@ -87,6 +87,7 @@ This project is a fully-featured, AI-powered music creation studio designed to r
 
 Once everything is running, verify the installation:
 
+0. **TypeScript type checks**: `pnpm typecheck` → should report no issues.
 1.  **Core API Health**: `GET http://127.0.0.1:8000/healthz` → `{"ok":true}`.
 2.  **VRAM Probe**: `GET http://127.0.0.1:8000/api/system/vram` → Returns JSON with GPU info.
 3.  **ACE-Step API**: `POST http://127.0.0.1:8001/api/ace/generate` with JSON body `{ "prompt": "test", "style": "lofi" }` → `{"url":"/static/ace/output.wav"}`.

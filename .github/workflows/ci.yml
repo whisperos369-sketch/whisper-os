@@ -26,5 +26,7 @@ jobs:
         run: pwsh windows/install.ps1
       - name: Run unit tests
         run: .\.venv\Scripts\python -m pytest -q
+      - name: TypeScript type check
+        run: pnpm typecheck
       - name: Build UI
         run: pnpm build
