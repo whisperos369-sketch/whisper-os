@@ -5,14 +5,43 @@
 
 Write-Host "=== Preflight Checks ==="
 
-try { node --version } catch { Write-Warning "node not found" }
-try { pnpm --version } catch { Write-Warning "pnpm not found" }
-try { python --version } catch { Write-Warning "python not found" }
-try { ffmpeg -version } catch { Write-Warning "ffmpeg not found" }
+$missing = @()
+
+function Check-Version {
+  param(
+    [string]$Command,
+    [string]$Name
+  )
+  if (Get-Command $Command -ErrorAction SilentlyContinue) {
+    try {
+      $ver = & $Command --version
+      Write-Host "$Name: $ver"
+    } catch {
+      Write-Warning "$Name found but failed to report version"
+    }
+  } else {
+    Write-Warning "$Name not found"
+    $script:missing += $Name
+  }
+}
+
+Check-Version node "Node"
+Check-Version pnpm "pnpm"
+Check-Version python "Python"
+Check-Version ffmpeg "ffmpeg"
+
 if (Get-Command nvidia-smi -ErrorAction SilentlyContinue) {
-    nvidia-smi
+  nvidia-smi | Select-Object -First 1
 } elseif (Get-Command nvcc -ErrorAction SilentlyContinue) {
-    nvcc --version
+  nvcc --version
 } else {
-    Write-Warning "CUDA tools not found (nvidia-smi or nvcc)"
+  Write-Warning "CUDA tools not found (nvidia-smi or nvcc)"
+  $missing += 'CUDA'
+}
+
+if ($missing.Count -gt 0) {
+  Write-Error "Missing dependencies: $($missing -join ', ')"
+  exit 1
+} else {
+  Write-Host "All dependencies present."
 }
