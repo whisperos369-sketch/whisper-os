@@ -79,3 +79,4 @@ export class ReleasesUtility extends LitElement {
 }
 
 export default ReleasesUtility;
+
