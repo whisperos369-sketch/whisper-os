@@ -39,21 +39,36 @@ class AIService {
         });
     }
 
-    async musicGen(input: { prompt: string; duration: number; model: string; [key: string]: any }): Promise<{ url: string, model_used: string, note?: string }> {
-      return _fetch(env.MUSICGEN_URL + '/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(input)
-      });
+    async musicGen(input: {
+        prompt: string;
+        duration: number;
+        model: string;
+        temperature?: number;
+        top_k?: number;
+        top_p?: number;
+    }): Promise<{ url: string; model_used: string; note?: string }> {
+        return _fetch(env.MUSICGEN_URL + '/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(input)
+        });
     }
-    
-// FIX: Add index signature to allow additional properties like temperature, top_k, and top_p.
-    async generateMusicChunked(input: { prompt: string, segmentSeconds: number, crossfadeMs: number, maxSegments: number, model: string, [key: string]: any }): Promise<{ url: string, segments: number, model_used: string, note?: string, duration_sec: number }> {
-       return _fetch(env.MUSICGEN_URL + '/chunked', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(input)
-      });
+
+    async generateMusicChunked(input: {
+        prompt: string;
+        segmentSeconds: number;
+        crossfadeMs: number;
+        maxSegments: number;
+        model: string;
+        temperature?: number;
+        top_k?: number;
+        top_p?: number;
+    }): Promise<{ url: string; segments: number; model_used: string; note?: string; duration_sec: number }> {
+        return _fetch(env.MUSICGEN_URL + '/chunked', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(input)
+        });
     }
 
     async rvcConvert(input: { audio_url: string; target_voice: string; [key: string]: any }): Promise<{ url: string }> {
