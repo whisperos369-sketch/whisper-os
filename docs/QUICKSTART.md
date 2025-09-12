@@ -6,20 +6,25 @@
    git clone <repo>
    cd whisper-os
    ```
-2. Run setup script
+2. Copy environment template
+   ```powershell
+   Copy-Item .env.example .env.local
+   ```
+3. Run setup script
    ```powershell
    .\scripts\setup.ps1
    ```
-3. Verify installation
+4. Verify installation
    ```powershell
-   pytest
-   npm run build
+    pytest
+    pnpm test
+    pnpm run build
    ```
-4. Start development servers
+5. Start development servers
    ```powershell
    .\scripts\dev.ps1
    ```
-5. Visit UI at http://localhost:5173 and API health at http://localhost:8080/api/system/health
+6. Visit UI at http://localhost:5173 and API health at http://localhost:8080/api/system/health
 
 ## Linux / macOS
 1. Clone repository
@@ -28,16 +33,22 @@
    cd whisper-os
    python -m venv .venv
    source .venv/bin/activate
-   pip install -r api/requirements.txt
-   npm install
+    pip install -r api/requirements.txt
+    pnpm install
    ```
-2. Verify installation
+2. Copy environment template
    ```bash
-   pytest
-   npm run build
+   cp .env.example .env.local
    ```
-3. Start servers
+3. Verify installation
    ```bash
-   uvicorn api.app.main:app --reload --port 8080 &
-   npm run dev
+    pytest
+    pnpm test
+    pnpm run build
    ```
+4. Start servers
+   ```bash
+    uvicorn api.app.main:app --reload --port 8080 &
+    pnpm run dev
+   ```
+

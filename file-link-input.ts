@@ -12,7 +12,6 @@ import { sharedStyles } from './shared-styles.ts';
 type InputType = 'file' | 'link';
 
 @customElement('file-link-input')
-// FIX: Extend LitElement to enable component functionality.
 export class FileLinkInput extends LitElement {
     @property({ type: Boolean }) showRadioToggle = true;
 
@@ -145,3 +144,4 @@ export class FileLinkInput extends LitElement {
         `;
     }
 }
+

@@ -32,3 +32,4 @@ export class ReleasesUtility extends LitElement {
         return html`<div id="releases-utility"></div>`;
     }
 }
+

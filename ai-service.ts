@@ -47,7 +47,6 @@ class AIService {
       });
     }
     
-// FIX: Add index signature to allow additional properties like temperature, top_k, and top_p.
     async generateMusicChunked(input: { prompt: string, segmentSeconds: number, crossfadeMs: number, maxSegments: number, model: string, [key: string]: any }): Promise<{ url: string, segments: number, model_used: string, note?: string, duration_sec: number }> {
        return _fetch(env.MUSICGEN_URL + '/chunked', {
           method: 'POST',
@@ -155,5 +154,6 @@ class AIService {
         return Promise.resolve({captions: platforms.map(p => ({ platform: p, caption: `Check out ${title}!` })), hookSlices: {"5s": "0:10-0:15", "12s": "0:30-0:42", "30s": "1:00-1:30"} });
     }
 }
+
 
 export const aiService = new AIService();
