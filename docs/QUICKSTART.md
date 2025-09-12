@@ -6,26 +6,31 @@
    git clone <repo>
    cd whisper-os
    ```
-2. Run setup script
+2. Copy `.env.example` to `.env.local` and edit required keys
+   ```powershell
+   Copy-Item .env.example .env.local
+   ```
+3. Run setup script
    ```powershell
    .\scripts\setup.ps1
    ```
-3. Verify installation
+4. Verify installation
    ```powershell
    pytest
    npm run build
    ```
-4. Start development servers
+5. Start development servers
    ```powershell
    .\scripts\dev.ps1
    ```
-5. Visit UI at http://localhost:5173 and API health at http://localhost:8080/api/system/health
+6. Visit UI at http://localhost:5173 and API health at http://localhost:8080/api/system/health
 
 ## Linux / macOS
 1. Clone repository
    ```bash
    git clone <repo>
    cd whisper-os
+   cp .env.example .env.local
    python -m venv .venv
    source .venv/bin/activate
    pip install -r api/requirements.txt

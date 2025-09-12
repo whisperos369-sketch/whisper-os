@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from .routers import lyrics, music, cover, video, system
+from .routers import lyrics, music, cover, video, system, products
 
 app = FastAPI()
 
@@ -8,6 +8,7 @@ app.include_router(music.router, prefix="/api/music")
 app.include_router(cover.router, prefix="/api/cover")
 app.include_router(video.router, prefix="/api/video")
 app.include_router(system.router, prefix="/api/system")
+app.include_router(products.router, prefix="/api/products")
 
 
 @app.get("/")
