@@ -53,24 +53,35 @@ This project is a fully-featured, AI-powered music creation studio designed to r
     - Open `.env.local` and replace `REPLACE_WITH_YOUR_KEY` with your Google Gemini API key. Other keys can be configured later via the UI.
     - Set your desired defaults for chunked rendering and auto-fallback.
 
-3.  **Run the Development Environment (One-Click):**
-    This single orchestrator script handles everything: it creates virtual environments, installs all Python and Node.js dependencies, and starts both backend servers and the frontend development server concurrently.
+3. **Preflight Check:**
+   Verify that required tools are installed and CUDA is available.
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .\windows\preflight.ps1
+   ```
 
-    Open PowerShell and run:
-    ```powershell
-    # From the project root directory
-    powershell -ExecutionPolicy Bypass -File .\windows\orchestrate.ps1
-    ```
-    - The **Core API** (MusicGen, LLM, Publisher) will start on `http://127.0.0.1:8000`.
-    - The **ACE-Step API** will start on `http://127.0.0.1:8001`.
-    - The **Frontend UI** will be available at `http://localhost:5173`.
+4. **Install Dependencies:**
+   Install pnpm packages and Python requirements inside a virtual environment.
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .\windows\install.ps1
+   ```
 
-4. **Stop All Services:**
-   To stop all running processes gracefully, use the `stop-all.ps1` script:
-    ```powershell
-    # From the project root directory
-    powershell -ExecutionPolicy Bypass -File .\windows\stop-all.ps1
-    ```
+5. **Run the Development Environment:**
+   Start the API with hot reload and the UI development server.
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .\windows\run-dev.ps1
+   ```
+
+6. **Run in Production Mode:**
+   Build the UI and launch the API with two workers serving the static build.
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .\windows\run-prod.ps1
+   ```
+
+7. **Stop All Services:**
+   To stop running processes, use:
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .\windows\stop-all.ps1
+   ```
 
 ## Smoke Tests
 
