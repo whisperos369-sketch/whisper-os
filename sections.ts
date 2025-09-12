@@ -101,7 +101,7 @@ export function newSong(): SongState {
     id: crypto.randomUUID(),
     meta: { title: 'New Song', bpm: 140, key: 'E', duration: 24, lufsTarget: -14, createdAt: now, updatedAt: now },
     loraStack: [],
-    generators: { seed: 2025, temperature: 1.0, topK: 250, topP: 0.95, baseModel: 'facebook/musicgen-medium', mode: 'musicgen' },
+    generators: { seed: 2025, temperature: 1.0, topK: 250, topP: 0.95, baseModel: 'musicgen-medium', mode: 'musicgen' },
     audio: { stems: {} },
     visuals: {},
     versions: [],

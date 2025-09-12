@@ -39,15 +39,20 @@ class AIService {
         });
     }
 
-    async musicGen(input: { prompt: string; duration: number; model: string; [key: string]: any }): Promise<{ url: string, model_used: string, note?: string }> {
-      return _fetch(env.MUSICGEN_URL + '/generate', {
+    async musicGen(input: { prompt: string; duration: number; model: string; [key: string]: any }): Promise<{ url: string, raw: string, report: string, model_used: string, note?: string }> {
+      const data = await _fetch(env.MUSICGEN_URL + '/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(input)
+          body: JSON.stringify({
+              prompt: input.prompt,
+              durationSec: input.duration,
+              model: input.model,
+              seed: input.seed,
+          })
       });
+      return { url: data.mp3, raw: data.raw, report: data.report, model_used: data.model_used };
     }
     
-// FIX: Add index signature to allow additional properties like temperature, top_k, and top_p.
     async generateMusicChunked(input: { prompt: string, segmentSeconds: number, crossfadeMs: number, maxSegments: number, model: string, [key: string]: any }): Promise<{ url: string, segments: number, model_used: string, note?: string, duration_sec: number }> {
        return _fetch(env.MUSICGEN_URL + '/chunked', {
           method: 'POST',

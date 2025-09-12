@@ -15,6 +15,7 @@ export class MusicModule extends StudioModule {
   
   @state() private prompt = 'dark cinematic hip-hop, heavy 808s, halftime groove';
   @state() private url?: string;
+  @state() private artifacts?: { raw: string; report: string };
   @state() private duration = 12;
 
   // Chunked rendering state
@@ -47,23 +48,11 @@ export class MusicModule extends StudioModule {
           prompt: this.prompt,
           duration: this.duration,
           model: generators.baseModel,
-          temperature: generators.temperature,
-          top_k: generators.topK,
-          top_p: generators.topP,
         });
 
         this.url = res.url;
-        const newVersion = {id: crypto.randomUUID(), label:`MusicGen ${this._app.songState!.versions.length+1}`, url:res.url, createdAt:Date.now()};
-      
-        const updates: Partial<SongState> = {
-            audio: { ...this._app.songState!.audio, latestMix: res.url },
-            versions: [...this._app.songState!.versions, newVersion],
-        };
-        if (res.note) {
-            this._app.showToast(res.note, 'info');
-        }
-        this._app.updateCurrentSong(updates);
-
+        this.artifacts = { raw: res.raw, report: res.report };
+        await this._drawWaveform(res.raw);
         return res;
       };
       
@@ -72,6 +61,30 @@ export class MusicModule extends StudioModule {
           { message: 'Generating audio waveform...', duration: 8000 },
           { message: 'Finalizing audio...', duration: 2000 },
       ], task);
+  }
+
+  private async _drawWaveform(url: string) {
+    const res = await fetch(url);
+    const arrayBuffer = await res.arrayBuffer();
+    const audioCtx = new AudioContext();
+    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    const canvas = this.renderRoot.querySelector('#waveform') as HTMLCanvasElement | null;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const data = audioBuffer.getChannelData(0);
+    const step = Math.ceil(data.length / canvas.width);
+    const amp = canvas.height / 2;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.beginPath();
+    for (let i = 0; i < canvas.width; i++) {
+      const min = data[i * step];
+      const y = (1 - min) * amp;
+      if (i === 0) ctx.moveTo(i, y);
+      else ctx.lineTo(i, y);
+    }
+    ctx.strokeStyle = '#6b21a8';
+    ctx.stroke();
   }
 
   private async _generateChunked() {
@@ -143,10 +156,8 @@ export class MusicModule extends StudioModule {
                  <div>
                     <label>Base Model</label>
                     <select .value=${generators.baseModel} @change=${(e: any) => this._updateGenerator('baseModel', e.target.value)} ?disabled=${this.isLoading}>
-                        <option value="facebook/musicgen-small">MusicGen Small</option>
-                        <option value="facebook/musicgen-medium">MusicGen Medium</option>
-                        <option value="facebook/musicgen-large">MusicGen Large</option>
-                        <option value="facebook/musicgen-melody">MusicGen Melody</option>
+                        <option value="musicgen-small">MusicGen Small</option>
+                        <option value="musicgen-medium">MusicGen Medium</option>
                     </select>
                 </div>
               </div>
@@ -221,6 +232,12 @@ export class MusicModule extends StudioModule {
             <div class="control-group" style="margin-top: 2rem;">
                 <h4>Generated Track</h4>
                 <audio controls src=${this.url}></audio>
+                <canvas id="waveform" width="600" height="100" style="width:100%;"></canvas>
+                <p class="sub-label">
+                  <a href="${this.artifacts?.raw}" target="_blank">Raw WAV</a> |
+                  <a href="${this.url}" target="_blank">MP3</a> |
+                  <a href="${this.artifacts?.report}" target="_blank">Report</a>
+                </p>
             </div>
         `:''}
       </div>
