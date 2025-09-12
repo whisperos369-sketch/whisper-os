@@ -2,6 +2,8 @@
 
 This project is a fully-featured, AI-powered music creation studio designed to run natively on Windows with NVIDIA GPU acceleration. It allows users to generate lyrics, music, and more through a web-based interface, backed by a Python API server.
 
+For quick setup instructions, see [docs/QUICKSTART.md](docs/QUICKSTART.md).
+
 ## Features
 
 - **Windows Native**: No Docker or WSL required. Runs directly on Windows for maximum performance.

@@ -72,11 +72,14 @@ export class VideoModule extends StudioModule {
         }
     };
     
-    await this._performTask('Render Video', [
+    const res = await this._performTask('Render Video', [
         { message: 'Preparing assets for video render...', duration: 1500 },
         { message: 'Rendering frames with FFMpeg...', duration: 6000 },
         { message: 'Encoding final video...', duration: 2000 },
     ], task);
+    if (!res) {
+        this._app.showToast(this.errorMessage || 'Video render failed.', 'error');
+    }
   }
 
   render() {

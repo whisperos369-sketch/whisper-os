@@ -62,10 +62,13 @@ export class SongwritingModule extends StudioModule {
       return res;
     };
     
-    await this._performTask('Generate Lyric Drafts', [
+    const res = await this._performTask('Generate Lyric Drafts', [
         { message: 'Sending prompt to LLM service...', duration: 1000 },
         { message: 'Generating lyrical concepts...', duration: 2500 },
     ], task);
+    if (!res) {
+      this._app.showToast(this.errorMessage || 'Lyric draft failed.', 'error');
+    }
   }
 
   private _adopt(i: number) {

@@ -132,6 +132,7 @@ export class CoverArtModule extends LitElement {
       this.pickedUrl = res.pickedUrl;
     } catch (e: any) {
       this.error = e?.message ?? 'Cover art generation failed.';
+      this._app.showToast(this.error, 'error');
     } finally {
       this.loading = false;
     }

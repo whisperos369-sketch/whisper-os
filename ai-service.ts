@@ -31,16 +31,16 @@ class AIService {
         }
     }
 
-    async lyricsDraft(input: { prompt: string; [key: string]: any }): Promise<LyricsDraftResponse> {
-        return _fetch('/api/llm/compose', {
+    async lyricsDraft(input: { prompt: string; style?: string; [key: string]: any }): Promise<LyricsDraftResponse> {
+        return _fetch('/api/lyrics/draft', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...input, task: 'songwriting' })
+            body: JSON.stringify(input)
         });
     }
 
-    async musicGen(input: { prompt: string; duration: number; model: string; [key: string]: any }): Promise<{ url: string, model_used: string, note?: string }> {
-      return _fetch(env.MUSICGEN_URL + '/generate', {
+    async musicGen(input: { prompt: string; durationSec: number; model: string; [key: string]: any }): Promise<{ wavPath: string, mp3Path: string, report: any }> {
+      return _fetch('/api/music/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(input)
@@ -95,17 +95,20 @@ class AIService {
         return Promise.resolve({ report: 'This is a mock evaluation.' });
     }
 
-    async coverArt(input: { prompt: string; numImages: number; [key: string]: any }): Promise<{ images: { url: string, score: number }[], pickedUrl: string }> {
-        const images = Array.from({ length: input.numImages }).map((_, i) => ({
-            url: `https://placehold.co/512x512/7e22ce/ffffff?text=Art+${i+1}`,
-            score: Math.random(),
-        }));
-        images.sort((a, b) => b.score - a.score);
-        return Promise.resolve({ images, pickedUrl: images[0].url });
+    async coverArt(input: { prompt: string; [key: string]: any }): Promise<{ imagePath: string }> {
+        return _fetch('/api/cover/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(input)
+        });
     }
 
-    async videoGen(input: any): Promise<{ videoUrl: string }> {
-        return Promise.resolve({ videoUrl: 'https://storage.googleapis.com/vimeo-test/work-8496162-V1.mp4' });
+    async videoGen(input: { audioPath: string; preset: string; [key: string]: any }): Promise<{ videoPath: string }> {
+        return _fetch('/api/video/render', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(input)
+        });
     }
 
     async aceGenerate(input: { prompt: string; style: string }): Promise<{ url: string }> {
