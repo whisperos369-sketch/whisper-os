@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 import os
 import sys
 import pathlib
+os.environ.setdefault("CELERY_TASK_ALWAYS_EAGER", "1")
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[2]))
 from api.app.main import app
 

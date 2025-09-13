@@ -23,7 +23,11 @@
    ```powershell
    .\scripts\dev.ps1
    ```
-6. Visit UI at http://localhost:5173 and API health at http://localhost:8080/api/system/health
+6. In another terminal, start the Celery worker
+   ```powershell
+   .\scripts\worker.ps1
+   ```
+7. Visit UI at http://localhost:5173 and API health at http://localhost:8080/api/system/health
 
 ## Linux / macOS
 1. Clone repository
@@ -41,8 +45,9 @@
    pytest
    npm run build
    ```
-3. Start servers
+3. Start servers (run each in its own shell)
    ```bash
    uvicorn api.app.main:app --reload --port 8080 &
+   ./scripts/worker.sh &
    npm run dev
    ```
