@@ -55,7 +55,14 @@ For quick setup instructions, see [docs/QUICKSTART.md](docs/QUICKSTART.md).
     - Open `.env.local` and replace `REPLACE_WITH_YOUR_KEY` with your Google Gemini API key. Other keys can be configured later via the UI.
     - Set your desired defaults for chunked rendering and auto-fallback.
 
-3.  **Run the Development Environment (One-Click):**
+3.  **Install Dependencies:**
+    ```powershell
+    # From the project root directory
+    powershell -ExecutionPolicy Bypass -File .\windows\install.ps1
+    ```
+    The script creates a `.venv` if missing and installs Python requirements using `py`.
+
+4.  **Run the Development Environment (One-Click):**
     This single orchestrator script handles everything: it creates virtual environments, installs all Python and Node.js dependencies, and starts both backend servers and the frontend development server concurrently.
 
     Open PowerShell and run:
@@ -67,7 +74,7 @@ For quick setup instructions, see [docs/QUICKSTART.md](docs/QUICKSTART.md).
     - The **ACE-Step API** will start on `http://127.0.0.1:8001`.
     - The **Frontend UI** will be available at `http://localhost:5173`.
 
-4. **Stop All Services:**
+5. **Stop All Services:**
    To stop all running processes gracefully, use the `stop-all.ps1` script:
     ```powershell
     # From the project root directory
