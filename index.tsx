@@ -14,7 +14,7 @@ import { ABCompareService, type ABCompareState } from '@/ui/ab-compare-service.t
 import {chatContext, ChatContext, Message} from '@/chat-context.ts';
 import {formatDuration, hapticFeedback} from '@/utils.ts';
 import {sharedStyles} from '@/shared-styles.ts';
-import { aiService } from '@/ai-service.ts';
+import { aiService, AIError } from '@/ai-service.ts';
 import { projectStore } from '@/project-store.ts';
 import { newSong, type SongState } from '@/sections.ts';
 import '@/index.css';
@@ -235,7 +235,26 @@ export class WhisperMusicStudio extends LitElement {
     this._chat = {
       messages: this.messages,
       isLoading: this.isLoadingChat,
-      sendMessage: async (text: string) => { /* Stub */ },
+      sendMessage: async (text: string) => {
+        const userMsg: Message = { role: 'user', text, timestamp: new Date().toISOString() };
+        const modelMsg: Message = { role: 'model', text: '', timestamp: new Date().toISOString() };
+        this.messages = [...this.messages, userMsg, modelMsg];
+        this.isLoadingChat = true;
+        this._chat = { ...this._chat, messages: this.messages, isLoading: this.isLoadingChat };
+        try {
+          for await (const chunk of aiService.sendMessageStream(text)) {
+            modelMsg.text += chunk.text;
+            this.messages = [...this.messages];
+            this._chat = { ...this._chat, messages: this.messages };
+          }
+        } catch (err) {
+          const message = err instanceof AIError ? err.message : 'Chat failed';
+          this._app.showToast(message, 'error');
+        } finally {
+          this.isLoadingChat = false;
+          this._chat = { ...this._chat, isLoading: this.isLoadingChat };
+        }
+      },
     };
     this._checkForAutosave();
   }

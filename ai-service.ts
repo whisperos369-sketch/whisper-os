@@ -20,50 +20,90 @@ export class AIError extends Error {
 }
 
 class AIService {
-    
-    initializeChat() { /* Stub */ }
+
+    private chatSource?: EventSource;
+    private chatQueue: string[] = [];
+
+    private async request<T>(url: string, init: RequestInit, errorMessage: string): Promise<T> {
+        try {
+            return await _fetch(url, init);
+        } catch (err) {
+            throw new AIError(errorMessage, err);
+        }
+    }
+
+    initializeChat() {
+        try {
+            this.chatSource = new EventSource('/api/chat/stream');
+            this.chatSource.onmessage = (e: MessageEvent) => {
+                this.chatQueue.push(e.data as string);
+            };
+            this.chatSource.onerror = (e) => {
+                console.error('Chat stream error', e);
+            };
+        } catch (err) {
+            throw new AIError('Failed to initialize chat', err);
+        }
+    }
+
     async *sendMessageStream(text: string) {
-        const fullResponse = `This is a streamed response to "${text}".`;
-        const chunks = fullResponse.split(' ');
-        for (const chunk of chunks) {
-            await new Promise(r => setTimeout(r, 50));
-            yield { text: chunk + ' ' };
+        if (!this.chatSource) throw new AIError('Chat not initialized');
+        this.chatQueue.length = 0;
+        await this.request('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text })
+        }, 'Failed to send chat message');
+        while (true) {
+            if (this.chatQueue.length === 0) {
+                await new Promise(r => setTimeout(r, 50));
+                continue;
+            }
+            const chunk = this.chatQueue.shift()!;
+            if (chunk === '[DONE]') break;
+            yield { text: chunk };
         }
     }
 
     async lyricsDraft(input: { prompt: string; style?: string; [key: string]: any }): Promise<LyricsDraftResponse> {
-        return _fetch('/api/lyrics/draft', {
+        return this.request('/api/lyrics/draft', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(input)
-        });
+        }, 'Failed to draft lyrics');
     }
 
     async musicGen(input: { prompt: string; durationSec: number; model: string; [key: string]: any }): Promise<{ wavPath: string, mp3Path: string, report: any }> {
-      return _fetch('/api/music/generate', {
+      return this.request('/api/music/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(input)
-      });
+      }, 'Music generation failed');
     }
-    
+
 // FIX: Add index signature to allow additional properties like temperature, top_k, and top_p.
     async generateMusicChunked(input: { prompt: string, segmentSeconds: number, crossfadeMs: number, maxSegments: number, model: string, [key: string]: any }): Promise<{ url: string, segments: number, model_used: string, note?: string, duration_sec: number }> {
-       return _fetch(env.MUSICGEN_URL + '/chunked', {
+       return this.request(env.MUSICGEN_URL + '/chunked', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(input)
-      });
+      }, 'Chunked music generation failed');
     }
 
     async rvcConvert(input: { audio_url: string; target_voice: string; [key: string]: any }): Promise<{ url: string }> {
-        return Promise.resolve({ url: '/static/rvc_out.wav' });
+        return this.request('/api/rvc/convert', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(input)
+        }, 'RVC conversion failed');
     }
-    
+
     async generateVoice(input: { text: string, model: 'bark' | 'so-vits-svc' }): Promise<{ url: string }> {
-        console.log(`[AI Service Stub] Generating voice with ${input.model} for text: "${input.text.substring(0, 30)}..."`);
-        await new Promise(r => setTimeout(r, 2500));
-        return Promise.resolve({ url: '/static/generated_voice.wav' });
+        return this.request('/api/voice/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(input)
+        }, 'Voice generation failed');
     }
 
     async separate(input: { files: File[]; [key: string]: any }, onProgress?: (p: string) => void): Promise<{ stems: Record<string, string> }> {
@@ -96,27 +136,27 @@ class AIService {
     }
 
     async coverArt(input: { prompt: string; [key: string]: any }): Promise<{ imagePath: string }> {
-        return _fetch('/api/cover/generate', {
+        return this.request('/api/cover/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(input)
-        });
+        }, 'Cover art generation failed');
     }
 
     async videoGen(input: { audioPath: string; preset: string; [key: string]: any }): Promise<{ videoPath: string }> {
-        return _fetch('/api/video/render', {
+        return this.request('/api/video/render', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(input)
-        });
+        }, 'Video generation failed');
     }
 
     async aceGenerate(input: { prompt: string; style: string }): Promise<{ url: string }> {
-        return _fetch(env.ACE_URL, {
+        return this.request(env.ACE_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(input)
-        });
+        }, 'ACE generation failed');
     }
 
     async syncToGithub(payload: { commitMessage: string, branch: string }): Promise<{ status: string, commitUrl: string }> {
