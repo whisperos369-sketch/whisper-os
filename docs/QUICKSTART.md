@@ -10,9 +10,9 @@
    ```powershell
    Copy-Item .env.example .env.local
    ```
-3. Run setup script
+3. Install dependencies
    ```powershell
-   .\scripts\setup.ps1
+   powershell -ExecutionPolicy Bypass -File .\windows\install.ps1
    ```
 4. Verify installation
    ```powershell
